@@ -1,0 +1,178 @@
+no service finger
+no service tcp-small-servers
+no service udp-small-servers
+service timestamps debug datetime msec localtime
+service timestamps log datetime msec localtime
+service password-encryption
+hostname <TMPL_VAR NAME=HOSTNAME>
+!
+aaa new-model
+aaa authentication login default group tacacs+ line
+aaa authentication login console line
+aaa authorization exec default group tacacs+ if-authenticated
+aaa authorization config-commands
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 0 default start-stop group tacacs+
+aaa accounting commands 1 default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+aaa authorization commands 0 console group tacacs+ none
+aaa authorization commands 1 console group tacacs+ none
+aaa authorization commands 15 console group tacacs+ none
+aaa authorization config-commands
+aaa authorization commands 0 default group tacacs+
+aaa authorization commands 1 default group tacacs+
+aaa authorization commands 15 default group tacacs+
+enable secret <TMPL_VAR NAME=SECRETPASSWORD>
+!
+clock timezone GMT
+!
+ip subnet-zero
+!
+no ip domain-lookup
+vtp mode transparent
+vlan <TMPL_VAR NAME=VLAN>
+!
+banner motd ^
+*****************************************************************
+NOTICE TO USERS
+This is a Federal computer (and/or it is directly connected to a 
+to local network system) that is the property of the United 
+States Government.It is for authorized use only.Users 
+(authorized or unauthorized) have no explicit or implicit 
+expectation of privacy.
+
+Any or all uses of this system and all files on this system may 
+be intercepted, monitored, recorded, copied, audited, inspected, 
+and disclosed to authorized site, Department of Energy, and law 
+enforcement personnel, as well as authorized officials of other 
+agencies, both domestic and foreign.By using this system, the 
+user consents to such interception, monitoring, recording, 
+copying, auditing, inspection, and disclosure at the discretion 
+of authorized site or Department of Energy personnel.
+
+Unauthorized or improper use of this system may result in 
+administrative disciplinary action and civil and criminal 
+penalties.By continuing to use this system you indicate your 
+awareness of and consent to these terms and conditions of use.
+LOG OFF IMMEDIATELY if you do not agree to the conditions stated 
+in this warning.
+
+*****************************************************************
+^
+interface vlan 1
+no shut
+ip address <TMPL_VAR NAME=SWITCHIP> <TMPL_VAR NAME=SWITCHMASK>
+ip default-gateway <TMPL_VAR NAME=SWITCHDEFAULTGATEWAY>
+!
+!
+snmp-server location <TMPL_VAR NAME=SNMPLOCATION>
+!
+no ip http server
+logging buffered debug
+logging trap informational
+logging trap warnings
+logging facility syslog
+logging 10.10.179.253
+access-list 5 permit 10.10.108.0 0.0.1.255
+access-list 5 permit 10.10.179.0 0.0.0.255
+access-list 5 permit 10.10.91.0 0.0.0.255 
+access-list 5 permit 10.10.1.0 0.0.15.255 
+access-list 5 permit 10.10.16.0 0.0.7.255 
+access-list 5 permit 10.10.24.0 0.0.0.255
+access-list 5 permit 10.10.25.0 0.0.0.255
+access-list 5 deny any log
+access-list 10 permit 10.10.108.132
+access-list 10 permit 10.10.179.254
+access-list 10 permit 10.10.179.253
+access-list 10 permit 10.10.254.10
+access-list 11 permit 10.10.179.253
+access-list 23 permit 10.10.3.150
+snmp-server community <TMPL_VAR NAME=SNMPRO> RO 10
+snmp-server community <TMPL_VAR NAME=SNMPRW> RW 11
+snmp-server host 10.10.179.254 trap <TMPL_VAR NAME=SNMPRO>
+snmp-server enable traps
+snmp-server contact <TMPL_VAR NAME=SNMPCONTACT>
+tacacs-server host 10.10.179.248
+tacacs-server host 10.10.179.249
+tacacs-server key <TMPL_VAR NAME=VLAN>
+!
+!
+interface FastEthernet0/1
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/2
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/3
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/4
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/5
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/6
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/7
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/8
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/9
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/10
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/11
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface FastEthernet0/12
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface GigabitEthernet0/1
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+interface GigabitEthernet0/2
+  switchport access vlan <TMPL_VAR NAME=VLAN>
+  spanning-tree portfast
+!
+!
+interface <TMPL_VAR NAME=UPLINK>
+  no   switchport access vlan <TMPL_VAR NAME=VLAN>
+  no   spanning-tree portfast
+  description <TMPL_VAR NAME=UPLINKDESC>
+  switchport trunk allowed vlan 1,<TMPL_VAR NAME=VLAN>
+  switchport mode trunk
+!
+line con 0
+password <TMPL_VAR NAME=PASSWORD>
+login authentication console
+exec-timeout 30
+logging synchronous
+!
+line vty 0 15
+password <TMPL_VAR NAME=PASSWORD>
+access-class 5 in
+logging synchronous
+!
+ntp access-group peer 23
+<TMPL_INCLUDE NAME="ntp.tmpl">
+end
